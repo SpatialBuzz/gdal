@@ -309,7 +309,12 @@ CPLErr NWT_GRDRasterBand::IReadBlock( CPL_UNUSED int nBlockXOff, int nBlockYOff,
     NWT_GRDDataset *poGDS = reinterpret_cast<NWT_GRDDataset *>(poDS);
     if (nBlockXSize > INT_MAX / 2)
         return CE_Failure;
-    const int nRecordSize = nBlockXSize * 2;
+
+    const int nBytesPerPixel = poGDS->pGrd->nBitsPerPixel / 8;
+    if( nBytesPerPixel <= 0 || nBlockXSize > INT_MAX / nBytesPerPixel )
+        return CE_Failure;
+    const int nRecordSize = nBlockXSize * nBytesPerPixel;
+
     unsigned short raw1;
 
     // Seek to the data position
